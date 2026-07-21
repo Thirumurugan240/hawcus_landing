@@ -192,7 +192,7 @@ curl -s https://hawcus.com/sitemap.xml | head
 systemctl status hawcus --no-pager
 ```
 
-Then in a browser: the homepage, `/pricing.html`, `/book-a-demo.html`, `/blog/`,
+Then in a browser: the homepage, `/pricing`, `/book-a-demo`, `/blog/`,
 and sign in at `/admin`. Submit the demo form once and confirm the email arrives
 at hello@hawcus.com.
 
@@ -226,9 +226,9 @@ block, mapping each old URL to the closest new one:
 
 ```nginx
 location = /about-us.html      { return 301 /; }
-location = /contact.html       { return 301 /book-a-demo.html; }
-location = /privacy-policy.html { return 301 /privacy.html; }
-location = /refund-policy.html { return 301 /terms.html; }
+location = /contact.html       { return 301 /book-a-demo; }
+location = /privacy-policy.html { return 301 /privacy; }
+location = /refund-policy.html { return 301 /terms; }
 ```
 
 The six old blog articles have no equivalent here. Either port their content

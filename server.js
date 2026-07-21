@@ -309,12 +309,12 @@ const server = http.createServer(async (req, res) => {
       const posts = await db.listPosts({ status: "published" });
       const urls = [
         { loc: `${SITE_ORIGIN}/`, pri: "1.0" },
-        { loc: `${SITE_ORIGIN}/pricing.html`, pri: "0.9" },
-        { loc: `${SITE_ORIGIN}/book-a-demo.html`, pri: "0.9" },
+        { loc: `${SITE_ORIGIN}/pricing`, pri: "0.9" },
+        { loc: `${SITE_ORIGIN}/book-a-demo`, pri: "0.9" },
         ...FEATURE_SLUGS.map((s) => ({ loc: `${SITE_ORIGIN}/features/${s}/`, pri: "0.8" })),
         { loc: `${SITE_ORIGIN}/blog/`, pri: "0.8" },
-        { loc: `${SITE_ORIGIN}/privacy.html`, pri: "0.3" },
-        { loc: `${SITE_ORIGIN}/terms.html`, pri: "0.3" },
+        { loc: `${SITE_ORIGIN}/privacy`, pri: "0.3" },
+        { loc: `${SITE_ORIGIN}/terms`, pri: "0.3" },
         ...posts.map((p) => ({
           loc: `${SITE_ORIGIN}/blog/${p.slug}/`,
           pri: "0.7",
@@ -484,7 +484,23 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
     /* ---------- static site ---------- */
 
     if (req.method === "GET" || req.method === "HEAD") {
-      const served = await serveStatic(req, res, pathname === "/" ? "/index.html" : pathname);
+      /* Clean URLs. /pricing permanently redirects to /pricing so search
+         engines only ever index one address for the page. */
+      if (pathname.endsWith(".html") && pathname !== "/index.html") {
+        const clean = pathname.slice(0, -5).replace(/\/index$/, "/") || "/";
+        res.writeHead(301, { Location: clean + url.search });
+        return res.end();
+      }
+      if (pathname === "/index.html") {
+        res.writeHead(301, { Location: "/" + url.search });
+        return res.end();
+      }
+
+      let target = pathname === "/" ? "/index.html" : pathname;
+      // an extensionless path is served from the matching .html file
+      if (!path.extname(target) && !target.endsWith("/")) target += ".html";
+
+      const served = await serveStatic(req, res, target);
       if (served) return;
     }
 

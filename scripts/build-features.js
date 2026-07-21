@@ -247,8 +247,8 @@ ${chrome.header}
             <h1>${esc(f.title)}</h1>
             <p class="fhero__lead">${esc(f.heroLead)}</p>
             <div class="fhero__cta">
-              <a class="btn btn--primary btn--lg" href="/book-a-demo.html">Book a demo</a>
-              <a class="btn btn--ghost btn--lg" href="/pricing.html">See pricing</a>
+              <a class="btn btn--primary btn--lg" href="/book-a-demo">Book a demo</a>
+              <a class="btn btn--ghost btn--lg" href="/pricing">See pricing</a>
             </div>
             <p class="fhero__note">Included in the single Hawcus plan at Rs 4,999 a month. No feature tiers.</p>
           </div>
@@ -373,8 +373,8 @@ ${WHY_HAWCUS}
           <h2>See ${esc(f.name)} on your own pipeline</h2>
           <p>A 15-minute walkthrough with your leads, your stages and your number. No slides.</p>
           <div class="fcta__btns">
-            <a class="btn btn--primary btn--lg" href="/book-a-demo.html">Book a demo</a>
-            <a class="btn btn--ghost btn--lg" href="/pricing.html">See pricing</a>
+            <a class="btn btn--primary btn--lg" href="/book-a-demo">Book a demo</a>
+            <a class="btn btn--ghost btn--lg" href="/pricing">See pricing</a>
           </div>
         </div>
       </div>
@@ -414,4 +414,4 @@ if (booking.includes(START) && booking.includes(END)) {
   booking = booking.replace("  </main>", `${block}\n  </main>`);
 }
 await fs.writeFile(BOOKING, booking, "utf8");
-console.log("synced  /book-a-demo.html");
+console.log("synced  /book-a-demo");
