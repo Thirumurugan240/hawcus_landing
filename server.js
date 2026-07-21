@@ -57,6 +57,9 @@ async function readBody(req, limit = 1_000_000) {
   }
 }
 
+/* Public pages answer HEAD as well as GET: crawlers and uptime monitors use it. */
+const isRead = (req) => req.method === "GET" || req.method === "HEAD";
+
 function requireAuth(req, res) {
   const session = readSession(req);
   if (!session) {
@@ -265,13 +268,13 @@ const server = http.createServer(async (req, res) => {
   try {
     /* ---------- public blog (rendered from Postgres) ---------- */
 
-    if (req.method === "GET" && (pathname === "/blog" || pathname === "/blog/")) {
+    if (isRead(req) && (pathname === "/blog" || pathname === "/blog/")) {
       const posts = await db.listPosts({ status: "published" });
       return send(res, 200, renderBlogIndex(posts), { "Cache-Control": "no-cache" });
     }
 
     const articleMatch = /^\/blog\/([a-z0-9-]+)\/?$/.exec(pathname);
-    if (req.method === "GET" && articleMatch) {
+    if (isRead(req) && articleMatch) {
       const slug = articleMatch[1];
       /* Articles are canonical with a trailing slash. Serving both forms would
          leave a duplicate URL for every post, so redirect to the canonical one. */
@@ -311,7 +314,7 @@ const server = http.createServer(async (req, res) => {
 
     /* ---------- dynamic sitemap ---------- */
 
-    if (req.method === "GET" && pathname === "/sitemap.xml") {
+    if (isRead(req) && pathname === "/sitemap.xml") {
       const posts = await db.listPosts({ status: "published" });
       const urls = [
         { loc: `${SITE_ORIGIN}/`, pri: "1.0" },
@@ -489,7 +492,7 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
 
     /* ---------- static site ---------- */
 
-    if (req.method === "GET" || req.method === "HEAD") {
+    if (isRead(req)) {
       /* Clean URLs. /pricing permanently redirects to /pricing so search
          engines only ever index one address for the page. */
       if (pathname.endsWith(".html") && pathname !== "/index.html") {
