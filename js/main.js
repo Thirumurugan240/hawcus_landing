@@ -320,8 +320,11 @@
     }
   }
 
-  /* ---- Lead-nurturing popup (fires 7s after every page load) ---- */
-  var popup = document.getElementById("nurture-popup");
+  /* ---- Lead-nurturing popup (fires 7s after every page load) ----
+     Skipped where the visitor is already looking at a booking form. Asking
+     someone to book a demo while they are filling in the demo form is noise,
+     and it covers the fields they are typing into. */
+  var popup = document.getElementById("demo-booking") ? null : document.getElementById("nurture-popup");
   if (popup) {
     var lastFocus = null;
 
