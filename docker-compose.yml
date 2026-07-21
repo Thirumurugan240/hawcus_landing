@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hawcus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hawcus
+      POSTGRES_PASSWORD: hawcus_dev_pw
+      POSTGRES_DB: hawcus
+    ports:
+      # 5433 on the host so it never clashes with a local Postgres install
+      - "5433:5432"
+    volumes:
+      - hawcus-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hawcus -d hawcus"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  hawcus-pgdata:

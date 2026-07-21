@@ -1,0 +1,20 @@
+{
+  "name": "hawcus-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hawcus CRM marketing site with a Postgres-backed blog CMS and admin dashboard.",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f db",
+    "seed": "node scripts/seed.js",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build:features": "node scripts/build-features.js"
+  },
+  "dependencies": {
+    "nodemailer": "^9.0.3",
+    "pg": "^8.13.1"
+  }
+}

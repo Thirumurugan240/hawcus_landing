@@ -1,0 +1,11 @@
+node_modules/
+.env
+__MACOSX/
+*.log
+
+# macOS junk
+.DS_Store
+**/.DS_Store
+
+# uploaded author pictures are content, not source
+assets/authors/

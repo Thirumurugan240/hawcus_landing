@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Workflow Automation and Triggers | Hawcus CRM</title>
+  <meta name="description" content="Hawcus smart triggers: when-this-then-that rules that route leads, send messages and raise tasks automatically based on what the lead does." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://hawcus.com/features/smart-triggers/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Smart Triggers | Hawcus CRM" />
+  <meta property="og:description" content="Hawcus smart triggers: when-this-then-that rules that route leads, send messages and raise tasks automatically based on what the lead does." />
+  <meta property="og:url" content="https://hawcus.com/features/smart-triggers/" />
+  <meta property="og:image" content="https://hawcus.com/hawcus-logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Smart Triggers | Hawcus CRM" />
+  <meta name="twitter:description" content="Trigger messages and workflows based on user actions." />
+
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What can fire a trigger?","acceptedAnswer":{"@type":"Answer","text":"A reply, a keyword in a message, a stage change, a value threshold, a form submission, a missed call or a set period of inactivity."}},{"@type":"Question","name":"What can a trigger do?","acceptedAnswer":{"@type":"Answer","text":"Send a message, assign or reassign an owner, change stage, raise a task, add a tag, notify a manager, or any combination of those."}},{"@type":"Question","name":"Can a lead get caught in two rules?","acceptedAnswer":{"@type":"Answer","text":"Rules run in the order you set, and you can stop later ones from firing once a match is found, so nobody receives contradictory messages."}},{"@type":"Question","name":"Do I need technical knowledge?","acceptedAnswer":{"@type":"Answer","text":"No. Triggers are built by picking a condition and an action from a list. If you can describe the rule out loud, you can build it."}}]}
+  </script>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://hawcus.com/"},{"@type":"ListItem","position":2,"name":"Features","item":"https://hawcus.com/#features"},{"@type":"ListItem","position":3,"name":"Smart Triggers","item":"https://hawcus.com/features/smart-triggers/"}]}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="nav" data-open="false" aria-label="Primary">
+        <a class="nav__logo" href="/" aria-label="Hawcus CRM home">
+          <img src="/hawcus-logo.png" alt="Hawcus CRM logo" width="138" height="58" />
+        </a>
+        <ul class="nav__links">
+          <li class="nav__item nav__item--has-menu">
+            <button type="button" class="nav__link" aria-haspopup="true" aria-expanded="false">
+              Features
+              <svg class="nav__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="mega" role="menu" aria-label="Features">
+              <div class="mega__grid">
+                <a class="mega__item" role="menuitem" href="/features/whatsapp-api/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M12.5 7.5L10 11h3l-2.5 3.5"/></svg></span>
+                  <span class="mega__text"><b>WhatsApp API</b><span>Reach every lead instantly with automated WhatsApp messaging.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/lead-management/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span>
+                  <span class="mega__text"><b>Lead Management</b><span>Segment, prioritize and streamline your sales pipeline.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/auto-follow-ups/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+                  <span class="mega__text"><b>Auto Follow-ups</b><span>Engage leads with timely, personalized messages automatically.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/integrations/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
+                  <span class="mega__text"><b>Integrations</b><span>Connect your tools and sync data across your workflow.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/lead-capture/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+                  <span class="mega__text"><b>Lead Capture</b><span>Capture and store leads instantly from all your channels.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/whatsapp-crm/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 12v2M12 9v5M16 11v3"/></svg></span>
+                  <span class="mega__text"><b>WhatsApp CRM</b><span>Manage your entire sales workflow directly on WhatsApp.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/smart-triggers/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                  <span class="mega__text"><b>Smart Triggers</b><span>Trigger messages and workflows based on user actions.</span></span>
+                </a>
+                <a class="mega__item" role="menuitem" href="/features/dialer-app/">
+                  <span class="mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.4-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg></span>
+                  <span class="mega__text"><b>Dialer App</b><span>Call, record and manage every lead from your phone.</span></span>
+                </a>
+              </div>
+            </div>
+          </li>
+          <li><a href="/pricing.html">Pricing</a></li>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/#faq">FAQ</a></li>
+        </ul>
+        <div class="nav__actions">
+          <a class="btn btn--ghost" href="https://app.hawcus.com">Sign in</a>
+          <a class="btn btn--solid" href="/book-a-demo.html">Book a Demo</a>
+          <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ HERO ============ -->
+    <section class="section fhero">
+      <div class="container">
+        <nav class="fcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span aria-hidden="true">/</span>
+          <a href="/#features">Features</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Smart Triggers</span>
+        </nav>
+
+        <div class="fhero__grid">
+          <div class="fhero__copy">
+            <span class="eyebrow"><span class="fhero__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>Smart Triggers</span>
+            <h1>Workflows that react to what the lead actually does</h1>
+            <p class="fhero__lead">When this happens, do that. Build the rules once and Hawcus handles the routing, the reminders and the messages on its own.</p>
+            <div class="fhero__cta">
+              <a class="btn btn--primary btn--lg" href="/book-a-demo.html">Book a demo</a>
+              <a class="btn btn--ghost btn--lg" href="/pricing.html">See pricing</a>
+            </div>
+            <p class="fhero__note">Included in the single Hawcus plan at Rs 4,999 a month. No feature tiers.</p>
+          </div>
+          <div class="fhero__viz">
+
+          <div class="fig fig--trigger">
+            <div class="figtrig">
+              <div class="figrule figrule--a">
+                <div class="figrule__when"><span>When</span><b>Lead asks about pricing</b></div>
+                <span class="figrule__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <div class="figrule__then"><span>Then</span><b>Send the quote template and raise a task for the owner</b></div>
+              </div>
+              <div class="figrule figrule--b">
+                <div class="figrule__when"><span>When</span><b>Deal value over Rs 50,000</b></div>
+                <span class="figrule__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <div class="figrule__then"><span>Then</span><b>Assign to a senior rep and flag it on the board</b></div>
+              </div>
+              <div class="figrule figrule--c">
+                <div class="figrule__when"><span>When</span><b>No activity for 3 days</b></div>
+                <span class="figrule__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <div class="figrule__then"><span>Then</span><b>Nudge the lead and alert the manager</b></div>
+              </div>
+              <div class="figrule figrule--d">
+                <div class="figrule__when"><span>When</span><b>Lead replies to a sequence</b></div>
+                <span class="figrule__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <div class="figrule__then"><span>Then</span><b>Stop the sequence and hand it to the rep</b></div>
+              </div>
+            </div>
+            <p class="fig__cap">When this happens, do that</p>
+          </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EXPLANATION ============ -->
+    <section class="section section--tint">
+      <div class="container">
+        <div class="fintro">
+          <h2>Rules beat reminders</h2>
+          <p>Every sales process has unwritten rules. High-value enquiries go to the senior rep. Anyone who asks about pricing gets the quote within the hour. Nobody sits untouched for three days.</p>
+          <p>Unwritten rules only work when everyone is having a good week. Written as triggers, they hold on the bad weeks too, which is exactly when deals get dropped.</p>
+        </div>
+
+        <div class="fstats">
+          <div class="fstat">
+            <b>Instant</b>
+            <span class="fstat__l">Rule execution</span>
+            <span class="fstat__s">The moment the signal fires</span>
+          </div>
+          <div class="fstat">
+            <b>Any</b>
+            <span class="fstat__l">Number of conditions</span>
+            <span class="fstat__s">Combine signals however you need</span>
+          </div>
+          <div class="fstat">
+            <b>0</b>
+            <span class="fstat__l">Deals dropped on a busy day</span>
+            <span class="fstat__s">The rules do not get busy</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head">
+          <span class="eyebrow">How it works</span>
+          <h2>Live in an afternoon</h2>
+        </div>
+        <ol class="fsteps">
+          <li class="fstep">
+            <span class="fstep__n">01</span>
+            <h3>Pick the signal</h3>
+            <p>A reply, a keyword, a stage change, a value threshold, a period of silence or a form submission.</p>
+          </li>
+          <li class="fstep">
+            <span class="fstep__n">02</span>
+            <h3>Choose what happens</h3>
+            <p>Send a message, assign an owner, change stage, raise a task, notify a manager, or several at once.</p>
+          </li>
+          <li class="fstep">
+            <span class="fstep__n">03</span>
+            <h3>Let it hold the line</h3>
+            <p>The rule runs the same way on a quiet Tuesday and on the busiest day of the quarter.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ BENEFITS ============ -->
+    <section class="section section--tint">
+      <div class="container">
+        <div class="section__head">
+          <span class="eyebrow">What you get</span>
+          <h2>Why teams turn this on first</h2>
+        </div>
+        <div class="fbens">
+          <div class="fben">
+            <span class="fben__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <b>Route by value automatically</b>
+            <p>Big enquiries reach your best closer without anyone having to notice them first.</p>
+          </div>
+          <div class="fben">
+            <span class="fben__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <b>Silence is a signal</b>
+            <p>A lead going quiet fires a rule rather than waiting for someone to spot the gap.</p>
+          </div>
+          <div class="fben">
+            <span class="fben__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <b>Keyword-aware replies</b>
+            <p>Ask about price, delivery or availability and the right response goes out immediately.</p>
+          </div>
+          <div class="fben">
+            <span class="fben__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <b>Managers hear about it early</b>
+            <p>Alerts fire while a stalled deal is still recoverable, not at the month-end review.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head">
+          <span class="eyebrow">Questions</span>
+          <h2>Smart Triggers, answered</h2>
+        </div>
+        <div class="ffaq">
+          <div class="ffaq__item">
+            <b>What can fire a trigger?</b>
+            <p>A reply, a keyword in a message, a stage change, a value threshold, a form submission, a missed call or a set period of inactivity.</p>
+          </div>
+          <div class="ffaq__item">
+            <b>What can a trigger do?</b>
+            <p>Send a message, assign or reassign an owner, change stage, raise a task, add a tag, notify a manager, or any combination of those.</p>
+          </div>
+          <div class="ffaq__item">
+            <b>Can a lead get caught in two rules?</b>
+            <p>Rules run in the order you set, and you can stop later ones from firing once a match is found, so nobody receives contradictory messages.</p>
+          </div>
+          <div class="ffaq__item">
+            <b>Do I need technical knowledge?</b>
+            <p>No. Triggers are built by picking a condition and an action from a list. If you can describe the rule out loud, you can build it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OTHER FEATURES ============ -->
+    <section class="section section--tint">
+      <div class="container">
+        <div class="section__head">
+          <span class="eyebrow">Explore</span>
+          <h2>The rest of the product</h2>
+        </div>
+        <div class="frel">
+          <a class="frelcard" href="/features/whatsapp-api/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M12.5 7.5L10 11h3l-2.5 3.5"/></svg></span>
+            <b>WhatsApp API</b>
+            <span class="frelcard__p">Reach every lead instantly with automated WhatsApp messaging.</span>
+          </a>
+          <a class="frelcard" href="/features/lead-management/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span>
+            <b>Lead Management</b>
+            <span class="frelcard__p">Segment, prioritize and streamline your sales pipeline.</span>
+          </a>
+          <a class="frelcard" href="/features/auto-follow-ups/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+            <b>Auto Follow-ups</b>
+            <span class="frelcard__p">Engage leads with timely, personalized messages automatically.</span>
+          </a>
+          <a class="frelcard" href="/features/integrations/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
+            <b>Integrations</b>
+            <span class="frelcard__p">Connect your tools and sync data across your workflow.</span>
+          </a>
+          <a class="frelcard" href="/features/lead-capture/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+            <b>Lead Capture</b>
+            <span class="frelcard__p">Capture and store leads instantly from all your channels.</span>
+          </a>
+          <a class="frelcard" href="/features/whatsapp-crm/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 12v2M12 9v5M16 11v3"/></svg></span>
+            <b>WhatsApp CRM</b>
+            <span class="frelcard__p">Manage your entire sales workflow directly on WhatsApp.</span>
+          </a>
+          <a class="frelcard" href="/features/dialer-app/">
+            <span class="frelcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.4-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg></span>
+            <b>Dialer App</b>
+            <span class="frelcard__p">Call, record and manage every lead from your phone.</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============ WHY HAWCUS ============ -->
+    <section class="section why">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">The difference</span>
+          <h2>Why teams pick Hawcus over <span class="hl-ink">other sales tools</span></h2>
+        </div>
+        <div class="whyrow">
+          <div class="whyrow__viz">
+
+          <div class="fig fig--split">
+            <div class="figsplit">
+              <div class="figsplit__chat">
+                <div class="figsplit__bar"><span class="figsplit__av">P</span><b>Priya V</b></div>
+                <p class="figbub figbub--in">Hi, saw your ad. Is this available in Coimbatore?</p>
+                <p class="figbub figbub--out">Hi Priya, yes it is. I can walk you through it today if that helps.</p>
+                <p class="figbub figbub--in">Perfect, please do.</p>
+              </div>
+              <div class="figsplit__rec">
+                <b class="figsplit__rechead">Answered in</b>
+                <div class="figsplit__row"><span>First reply</span><b>9 seconds</b></div>
+                <div class="figsplit__row"><span>Qualified</span><b>Automatically</b></div>
+                <div class="figsplit__row"><span>Assigned</span><b>Ravi Kumar</b></div>
+                <div class="figsplit__row"><span>Status</span><b>Hot lead</b></div>
+              </div>
+            </div>
+            <p class="fig__cap">A reply goes out before the lead closes the tab</p>
+          </div>
+          </div>
+          <div class="whyrow__copy">
+            <h3>Never let a warm lead go cold</h3>
+            <p class="whyrow__lead">Most enquiries die waiting for a first reply. Hawcus answers the moment one arrives, day or night.</p>
+            <ul class="whylist">
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>A reply goes out within seconds of the enquiry</li>
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Leads are qualified against rules you set yourself</li>
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Anyone worth calling reaches the right rep straight away</li>
+            </ul>
+            <div class="whyresult">
+              <span class="whyresult__label">Result</span>
+              <b>Nothing sits unanswered, and your team spends its day on the leads worth having.</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="whyrow whyrow--flip">
+          <div class="whyrow__viz">
+
+          <div class="fig fig--cadence">
+            <ol class="figcad">
+              <li class="figcad__row figcad__row--now">
+                <span class="figcad__day">Day 0</span>
+                <span class="figcad__mark" aria-hidden="true"></span>
+                <span class="figcad__body"><b>Enquiry answered</b><span>Automatic, within seconds</span></span>
+              </li>
+              <li class="figcad__row figcad__row--on">
+                <span class="figcad__day">Day 2</span>
+                <span class="figcad__mark" aria-hidden="true"></span>
+                <span class="figcad__body"><b>Rep checks in</b><span>Prompted, not remembered</span></span>
+              </li>
+              <li class="figcad__row figcad__row--on">
+                <span class="figcad__day">Day 5</span>
+                <span class="figcad__mark" aria-hidden="true"></span>
+                <span class="figcad__body"><b>Quiet lead nudged</b><span>Sequence keeps running</span></span>
+              </li>
+              <li class="figcad__row figcad__row--off">
+                <span class="figcad__day">Replied</span>
+                <span class="figcad__mark" aria-hidden="true"></span>
+                <span class="figcad__body"><b>Sequence stops</b><span>The rep takes over</span></span>
+              </li>
+            </ol>
+            <p class="fig__cap">The cadence runs whether anyone remembers it or not</p>
+          </div>
+          </div>
+          <div class="whyrow__copy">
+            <h3>Close faster without chasing anyone</h3>
+            <p class="whyrow__lead">Follow-ups run on their own, so nobody has to keep a mental list of who to call back.</p>
+            <ul class="whylist">
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Each message fires at the stage it belongs to</li>
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Leads who go quiet get a nudge without being asked</li>
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Every reply is logged, and reps step in only when it matters</li>
+            </ul>
+            <div class="whyresult">
+              <span class="whyresult__label">Result</span>
+              <b>More replies, quicker decisions, and far less chasing.</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="whyrow">
+          <div class="whyrow__viz">
+
+          <div class="fig fig--board">
+            <div class="figboard">
+              <div class="figcol figcol--a">
+                <div class="figcol__head"><b>New</b><span>12</span></div>
+                <div class="figcard"><span class="figcard__av">P</span><span class="figcard__name">Priya V</span></div>
+                <div class="figcard"><span class="figcard__av">K</span><span class="figcard__name">Karthik R</span></div>
+                <div class="figcard"><span class="figcard__av">M</span><span class="figcard__name">Meena S</span></div>
+              </div>
+              <div class="figcol figcol--b">
+                <div class="figcol__head"><b>Contacted</b><span>8</span></div>
+                <div class="figcard"><span class="figcard__av">A</span><span class="figcard__name">Arun T</span></div>
+                <div class="figcard"><span class="figcard__av">S</span><span class="figcard__name">Sangeetha</span></div>
+              </div>
+              <div class="figcol figcol--c">
+                <div class="figcol__head"><b>Qualified</b><span>5</span></div>
+                <div class="figcard"><span class="figcard__av">D</span><span class="figcard__name">Dinesh K</span></div>
+              </div>
+              <div class="figcol figcol--d">
+                <div class="figcol__head"><b>Won</b><span>3</span></div>
+                <div class="figcard"><span class="figcard__av">P</span><span class="figcard__name">Prakash M</span></div>
+              </div>
+            </div>
+            <p class="fig__cap">Chats, calls and stages on one board</p>
+          </div>
+          </div>
+          <div class="whyrow__copy">
+            <h3>Run the whole pipeline from one screen</h3>
+            <p class="whyrow__lead">Chats, calls, notes and stages live together instead of being spread across four tools.</p>
+            <ul class="whylist">
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>See stage, value and history while you are still typing</li>
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Log a call or move a deal without leaving the conversation</li>
+              <li><span class="whylist__tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Saved replies and reminders keep everything moving</li>
+            </ul>
+            <div class="whyresult">
+              <span class="whyresult__label">Result</span>
+              <b>More control, cleaner tracking, and a smoother close.</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="fcta">
+          <h2>See Smart Triggers on your own pipeline</h2>
+          <p>A 15-minute walkthrough with your leads, your stages and your number. No slides.</p>
+          <div class="fcta__btns">
+            <a class="btn btn--primary btn--lg" href="/book-a-demo.html">Book a demo</a>
+            <a class="btn btn--ghost btn--lg" href="/pricing.html">See pricing</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <img src="/hawcus-logo-white.png" alt="Hawcus CRM logo" width="95" height="40" />
+          <p>The WhatsApp-first CRM that turns every lead into a conversation, and every conversation into a customer.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/#features">Features</a></li>
+            <li><a href="/#how">How it works</a></li>
+            <li><a href="/pricing.html">Pricing</a></li>
+            <li><a href="https://app.hawcus.com">Sign in</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="/blog/">Blog</a></li>
+            <li><a href="/#faq">FAQ</a></li>
+            <li><a href="/#contact">Get a demo</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="/#contact">Contact</a></li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li><a href="/terms.html">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span data-year>2026</span> Hawcus CRM. All rights reserved.</span>
+        <div class="footer__social">
+          <a href="https://www.facebook.com/profile.php?id=61591799066978" aria-label="Hawcus on Facebook" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>
+          <a href="https://www.instagram.com/hawcuscrm/" aria-label="Hawcus on Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4a3.9 3.9 0 0 1-1.4-.9 3.9 3.9 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.8-.1zm0 3.2A6.6 6.6 0 1 0 18.6 12 6.6 6.6 0 0 0 12 5.4zm0 10.9A4.3 4.3 0 1 1 16.3 12 4.3 4.3 0 0 1 12 16.3zm6.9-11.1a1.6 1.6 0 1 1-1.6-1.5 1.6 1.6 0 0 1 1.6 1.5z"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Timed lead-nurturing popup -->
+  <div class="popup" id="nurture-popup" hidden aria-hidden="true">
+    <div class="popup__backdrop" data-popup-close></div>
+    <div class="popup__card" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+      <button class="popup__close" type="button" aria-label="Close" data-popup-close>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <div class="popup__copy">
+        <span class="popup__eyebrow">Lead Nurturing</span>
+        <h2 class="popup__title" id="popup-title">Turn Silent Leads Into <span class="hl-ink">Conversations</span></h2>
+        <p class="popup__sub">Automatically re-engage inactive leads with personalised WhatsApp messages, reminders, and nurturing sequences.</p>
+        <a class="btn btn--primary btn--lg popup__cta" href="/book-a-demo.html" data-popup-close>Book A Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <p class="popup__note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Stay connected with every lead, automatically.
+        </p>
+      </div>
+
+      <div class="popup__visual" aria-hidden="true">
+        <div class="pchat">
+          <div class="pchat__bub pchat__bub--out">Hi Rohan, great speaking with you today. Here is a quick guide to our <b>exclusive travel packages for Singapore</b>. Let me know if you have questions.</div>
+          <div class="pchat__bub pchat__bub--in">Any special deals for families?</div>
+          <div class="pchat__bub pchat__bub--out">Yes, we have family packages with group discounts, kids activities, and upgraded stays. Happy to share the details.</div>
+          <div class="pchat__bub pchat__bub--in">Okay, great!</div>
+          <div class="pchat__bub pchat__bub--out">Did you know our <b>Travel Planner</b> handles flights, hotels, and curated local experiences in one place? Shall I walk you through it?</div>
+        </div>
+        <div class="ppanel">
+          <div class="ppanel__tabs"><span class="is-on"></span><span></span><span></span><span></span></div>
+          <div class="ppanel__row">
+            <span>Auto Follow-Ups</span>
+            <i class="ppanel__toggle"></i>
+          </div>
+          <div class="ppanel__row ppanel__row--stack">
+            <small>Lead Status</small>
+            <b>Excited for Singapore</b>
+          </div>
+          <div class="ppanel__row ppanel__row--stack">
+            <small>Next Message</small>
+            <b>Singapore Package</b>
+            <em>07 Jul, 18:00</em>
+          </div>
+          <div class="ppanel__row ppanel__row--stack">
+            <small>Active Sequence</small>
+            <div class="ppanel__select">Singapore <span>6 messages</span></div>
+          </div>
+          <div class="ppanel__hist">
+            <div class="ppanel__histhead"><span>Date</span><span>Message</span><span>Sent</span></div>
+            <div class="ppanel__histrow"><span>31 Jun</span><span>Welcome Message</span><span>Automatic</span></div>
+            <div class="ppanel__histrow"><span>04 Jul</span><span>Package Details</span><span>Automatic</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/main.js" defer></script>
+</body>
+</html>

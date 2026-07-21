@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Block nothing by default - this is a public marketing site.
+
+Sitemap: https://hawcus.com/sitemap.xml
