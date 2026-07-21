@@ -273,6 +273,12 @@ const server = http.createServer(async (req, res) => {
     const articleMatch = /^\/blog\/([a-z0-9-]+)\/?$/.exec(pathname);
     if (req.method === "GET" && articleMatch) {
       const slug = articleMatch[1];
+      /* Articles are canonical with a trailing slash. Serving both forms would
+         leave a duplicate URL for every post, so redirect to the canonical one. */
+      if (!pathname.endsWith("/")) {
+        res.writeHead(301, { Location: `/blog/${slug}/${url.search}` });
+        return res.end();
+      }
       const preview = url.searchParams.get("preview") === "1" && readSession(req);
       const post = await db.getPostBySlug(slug, { publishedOnly: !preview });
       if (!post) {
