@@ -733,10 +733,13 @@ ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; }
   max-width: 210px;
   object-fit: contain;
   flex: none;
-  opacity: 0.85;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  /* One consistent black-and-white treatment for every logo, regardless of
+     the colours or baked-in frames in the source files. */
+  filter: grayscale(1) contrast(0.95);
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
 }
-.marquee img:hover { opacity: 1; transform: scale(1.06); }
+.marquee img:hover { opacity: 0.9; transform: scale(1.06); }
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
