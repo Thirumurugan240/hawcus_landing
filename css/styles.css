@@ -59,6 +59,11 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 114px;
+  /* The footer is dark. Without this, overscrolling past it on iOS Safari shows
+     a white strip below the footer. Matching the root background to the footer
+     colour keeps that overscroll area dark instead of flashing white. */
+  background-color: var(--ink);
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -845,9 +850,10 @@ ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; }
   transform: translateY(-50%);
 }
 .fbchip svg { width: 20px; height: 20px; color: var(--clr); flex: none; }
-.fbchip--n1 { top: 18.1%; }
-.fbchip--n2 { top: 50%; }
-.fbchip--n3 { top: 81.9%; }
+.fbchip--n1 { top: 13.8%; }
+.fbchip--n2 { top: 38.1%; }
+.fbchip--n3 { top: 61.9%; }
+.fbchip--n4 { top: 86.2%; }
 
 .fbhub__core {
   position: absolute; right: 0; top: 50%; transform: translateY(-50%);
@@ -1553,7 +1559,8 @@ ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; }
 .dialer__content { display: flex; flex-direction: column; justify-content: center; }
 .dialer__content h2 { font-size: clamp(1.7rem, 3.2vw, 2.5rem); line-height: 1.15; margin-bottom: 0.85rem; }
 .dialer__lead { color: var(--ink); font-weight: 600; font-size: 1.02rem; line-height: 1.55; margin-bottom: 1.35rem; }
-.eyebrow--dial { background: var(--brand); box-shadow: 0 6px 16px rgba(234, 88, 12, 0.22); }
+/* align-self stops the flex column from stretching the badge to full width */
+.eyebrow--dial { align-self: flex-start; background: var(--brand); box-shadow: 0 6px 16px rgba(234, 88, 12, 0.22); }
 
 .dialer__visual {
   position: relative;
