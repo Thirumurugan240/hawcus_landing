@@ -5,8 +5,9 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { PORT, SITE_ORIGIN, MAIL_READY } from "./lib/config.js";
+import { PORT, SITE_ORIGIN, MAIL_READY, CRM_READY } from "./lib/config.js";
 import { sendLead } from "./lib/mail.js";
+import { sendToCrm } from "./lib/crm.js";
 import * as db from "./lib/db.js";
 import { login, createSessionCookie, clearSessionCookie, readSession, visitorId } from "./lib/auth.js";
 import { renderBlogIndex, renderArticle, slugify, estimateMinutes, gradFor, CATEGORIES } from "./lib/render.js";
@@ -235,6 +236,17 @@ function leadFields(lead) {
   ];
 }
 
+/* The CRM webhook wants an E.164-style number. A bare 10-digit Indian number
+   gets a +91 prefix; anything already prefixed with + is kept as entered. */
+function crmPhone(phone) {
+  const raw = String(phone || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  if (raw.startsWith("+")) return "+" + digits;
+  if (digits.length === 10) return "+91" + digits;
+  return digits;
+}
+
 /* ---------------- author picture uploads ---------------- */
 
 const AVATAR_DIR = path.join(ROOT, "assets", "authors");
@@ -382,7 +394,16 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
       const row = await db.createLead(lead);
       recordLead(ip);
 
+      /* Forward the enquiry to the Hawcus CRM workflow, in parallel with email.
+         A failure here must never fail the visitor's submission, so it is caught
+         and logged. Runs regardless of whether mail is configured. */
+      const crmDone = CRM_READY
+        ? sendToCrm({ name: lead.name, email: lead.email, phone: crmPhone(lead.phone) })
+            .catch((err) => console.error(`CRM forward failed for lead ${row.id}:`, err.message))
+        : Promise.resolve();
+
       if (!MAIL_READY) {
+        await crmDone;
         console.warn("Lead saved but mail is not configured:", row.id);
         return json(res, 200, { ok: true, emailed: false });
       }
@@ -390,10 +411,12 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
       try {
         await sendLead({ kind: lead.kind, fields: leadFields(lead) });
         await db.markLeadEmailed(row.id, true, "");
+        await crmDone;
         return json(res, 200, { ok: true, emailed: true });
       } catch (err) {
         await db.markLeadEmailed(row.id, false, err.message);
         console.error("Lead email failed:", err.message);
+        await crmDone;
         // the visitor has done nothing wrong, so still confirm to them
         return json(res, 200, { ok: true, emailed: false });
       }
