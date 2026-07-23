@@ -115,6 +115,15 @@
       document.getElementById("bd-fields").hidden = true;
       document.getElementById("bd-success").hidden = false;
       form.reset();
+
+      // Meta Pixel: fires once per booking - the fields are hidden after
+      // success, so the form cannot be submitted a second time. The inline
+      // confirmation above is this site's "thank you" state, so the
+      // CompleteRegistration event fires here too.
+      if (typeof window.fbq === "function") {
+        window.fbq("track", "Lead", { content_name: "demo_form", content_category: "form_submit" });
+        window.fbq("track", "CompleteRegistration", { content_name: "demo_booked" });
+      }
     } catch (ex) {
       setError("name", ex.message);
       btn.disabled = false;

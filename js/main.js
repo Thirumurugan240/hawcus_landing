@@ -2,6 +2,33 @@
 (function () {
   "use strict";
 
+  /* ---- Meta Pixel helper ----
+     Wraps fbq so a blocked or unloaded pixel can never break the page.
+     The base pixel code lives inline in each page's <head>. */
+  function fbTrack(event, params) {
+    if (typeof window.fbq === "function") window.fbq("track", event, params);
+  }
+
+  /* ---- Meta Pixel: CTA click tracking ----
+     One delegated listener so each physical click fires exactly one event,
+     no matter how many CTAs a page has or where they were added later
+     (e.g. the nurture popup). Sign-in links are deliberately not tracked. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a") : null;
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+    var isDemo = href.indexOf("book-a-demo") !== -1;
+    var isContact = /#contact$/.test(href);
+    if (!isDemo && !isContact) return;
+    // only real CTA buttons, not incidental text links
+    if (!a.classList.contains("btn") && !a.classList.contains("popup__cta")) return;
+    var label = (a.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
+    fbTrack("Lead", {
+      content_name: label || (isDemo ? "Book a Demo" : "Contact Sales"),
+      content_category: "cta_click",
+    });
+  });
+
   /* ---- Mobile nav toggle ---- */
   var nav = document.querySelector(".nav");
   var toggle = document.querySelector(".nav__toggle");
@@ -150,6 +177,10 @@
         }
         if (fields) fields.style.display = "none";
         form.reset();
+
+        // fires once: the fields are hidden after success, so the form
+        // cannot be submitted a second time
+        fbTrack("Lead", { content_name: "contact_form", content_category: "form_submit" });
       } catch (ex) {
         if (btn) {
           btn.disabled = false;
