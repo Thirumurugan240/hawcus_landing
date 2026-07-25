@@ -328,14 +328,15 @@ const server = http.createServer(async (req, res) => {
 
     if (isRead(req) && pathname === "/sitemap.xml") {
       const posts = await db.listPosts({ status: "published" });
+      const PAGES_MOD = "2026-07-25";
       const urls = [
-        { loc: `${SITE_ORIGIN}/`, pri: "1.0" },
-        { loc: `${SITE_ORIGIN}/pricing`, pri: "0.9" },
-        { loc: `${SITE_ORIGIN}/book-a-demo`, pri: "0.9" },
-        ...FEATURE_SLUGS.map((s) => ({ loc: `${SITE_ORIGIN}/features/${s}/`, pri: "0.8" })),
-        { loc: `${SITE_ORIGIN}/blog/`, pri: "0.8" },
-        { loc: `${SITE_ORIGIN}/privacy`, pri: "0.3" },
-        { loc: `${SITE_ORIGIN}/terms`, pri: "0.3" },
+        { loc: `${SITE_ORIGIN}/`, pri: "1.0", lastmod: PAGES_MOD },
+        { loc: `${SITE_ORIGIN}/pricing`, pri: "0.9", lastmod: PAGES_MOD },
+        { loc: `${SITE_ORIGIN}/book-a-demo`, pri: "0.9", lastmod: PAGES_MOD },
+        ...FEATURE_SLUGS.map((s) => ({ loc: `${SITE_ORIGIN}/features/${s}/`, pri: "0.8", lastmod: PAGES_MOD })),
+        { loc: `${SITE_ORIGIN}/blog/`, pri: "0.8", lastmod: PAGES_MOD },
+        { loc: `${SITE_ORIGIN}/privacy`, pri: "0.3", lastmod: PAGES_MOD },
+        { loc: `${SITE_ORIGIN}/terms`, pri: "0.3", lastmod: PAGES_MOD },
         ...posts.map((p) => ({
           loc: `${SITE_ORIGIN}/blog/${p.slug}/`,
           pri: "0.7",
