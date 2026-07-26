@@ -59,10 +59,13 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 114px;
-  /* The footer is dark. Without this, overscrolling past it on iOS Safari shows
-     a white strip below the footer. Matching the root background to the footer
-     colour keeps that overscroll area dark instead of flashing white. */
-  background-color: var(--ink);
+  /* Match the root background to the page surface (white). Every page opens at
+     the top on a white header, so this is the colour the browser paints between
+     navigations - keeping it white removes the dark flash that a dark root
+     background caused on every page change. overscroll-behavior-y: none stops
+     the iOS rubber-band bounce that would otherwise reveal this area past the
+     dark footer. */
+  background-color: var(--surface);
   overscroll-behavior-y: none;
 }
 

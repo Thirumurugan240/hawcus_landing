@@ -3,6 +3,7 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import crypto from "node:crypto";
 import path from "node:path";
+import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 import { PORT, SITE_ORIGIN, MAIL_READY, CRM_READY } from "./lib/config.js";
@@ -32,9 +33,30 @@ const MIME = {
 
 /* ---------------- helpers ---------------- */
 
-function send(res, status, body, headers = {}) {
-  res.writeHead(status, { "Content-Type": "text/html; charset=utf-8", ...headers });
-  res.end(body);
+/* Text responses (HTML, CSS, JS, SVG, XML, JSON) compress ~6x, so a 150 KB
+   stylesheet leaves the server as ~25 KB. Images and fonts are already
+   compressed, so we never gzip those. */
+const COMPRESSIBLE = /^(?:text\/|application\/(?:json|xml|manifest|javascript|ld\+json)|image\/svg)/;
+
+function acceptsGzip(req) {
+  return req && /\bgzip\b/.test(req.headers["accept-encoding"] || "");
+}
+
+function send(res, status, body, headers = {}, req = null) {
+  const outHeaders = { "Content-Type": "text/html; charset=utf-8", ...headers };
+  const buf = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+  const type = outHeaders["Content-Type"] || "";
+  if (acceptsGzip(req) && COMPRESSIBLE.test(type) && buf.length > 1024) {
+    const gz = zlib.gzipSync(buf);
+    outHeaders["Content-Encoding"] = "gzip";
+    outHeaders["Vary"] = "Accept-Encoding";
+    outHeaders["Content-Length"] = gz.length;
+    res.writeHead(status, outHeaders);
+    return res.end(gz);
+  }
+  outHeaders["Content-Length"] = buf.length;
+  res.writeHead(status, outHeaders);
+  res.end(buf);
 }
 
 function json(res, status, data, headers = {}) {
@@ -125,15 +147,42 @@ async function serveStatic(req, res, urlPath) {
        Set ASSET_CACHE=long once the site is stable to cache CSS and JS too. */
     const churns = ext === ".css" || ext === ".js";
     const longCache = process.env.ASSET_CACHE === "long";
-    res.writeHead(200, {
-      "Content-Type": MIME[ext] || "application/octet-stream",
-      "Cache-Control": isAdmin
-        ? "no-store"
-        : !isAsset || (churns && !longCache)
-        ? "no-cache"
-        : "public, max-age=3600",
-      "Content-Length": stat.size,
-    });
+    const type = MIME[ext] || "application/octet-stream";
+    const cacheControl = isAdmin
+      ? "no-store"
+      : !isAsset || (churns && !longCache)
+      ? "no-cache"
+      : "public, max-age=3600";
+    /* Send a Last-Modified validator (except for the never-cached admin panel)
+       so a "no-cache" asset can be revalidated with a cheap 304 instead of a
+       full re-download on every page navigation. mtime changes on deploy, so a
+       fresh file is always fetched in full. */
+    const lastModified = stat.mtime.toUTCString();
+    if (!isAdmin) {
+      const ims = Date.parse(req.headers["if-modified-since"] || "");
+      if (!Number.isNaN(ims) && Math.floor(stat.mtimeMs / 1000) <= Math.floor(ims / 1000)) {
+        res.writeHead(304, { "Cache-Control": cacheControl, "Last-Modified": lastModified });
+        res.end();
+        return true;
+      }
+    }
+    const headers = {
+      "Content-Type": type,
+      "Cache-Control": cacheControl,
+    };
+    if (!isAdmin) headers["Last-Modified"] = lastModified;
+    /* gzip text assets (HTML, CSS, JS, SVG, XML) so a 150 KB stylesheet ships
+       as ~25 KB. Binary files (images, fonts, favicon) stream as-is with a
+       Content-Length, since they are already compressed. */
+    if (acceptsGzip(req) && COMPRESSIBLE.test(type) && stat.size > 1024) {
+      headers["Content-Encoding"] = "gzip";
+      headers["Vary"] = "Accept-Encoding";
+      res.writeHead(200, headers);
+      fs.createReadStream(filePath).pipe(zlib.createGzip()).pipe(res);
+      return true;
+    }
+    headers["Content-Length"] = stat.size;
+    res.writeHead(200, headers);
     fs.createReadStream(filePath).pipe(res);
     return true;
   } catch {
@@ -282,7 +331,7 @@ const server = http.createServer(async (req, res) => {
 
     if (isRead(req) && (pathname === "/blog" || pathname === "/blog/")) {
       const posts = await db.listPosts({ status: "published" });
-      return send(res, 200, renderBlogIndex(posts), { "Cache-Control": "no-cache" });
+      return send(res, 200, renderBlogIndex(posts), { "Cache-Control": "no-cache" }, req);
     }
 
     const articleMatch = /^\/blog\/([a-z0-9-]+)\/?$/.exec(pathname);
@@ -308,7 +357,7 @@ const server = http.createServer(async (req, res) => {
       if (post.status === "published") {
         db.recordView(post.id, visitorId(req), req.headers.referer || "").catch(() => {});
       }
-      return send(res, 200, renderArticle(post, faqs, related), { "Cache-Control": "no-cache" });
+      return send(res, 200, renderArticle(post, faqs, related), { "Cache-Control": "no-cache" }, req);
     }
 
     /* ---------- reading-time beacon ---------- */
@@ -347,7 +396,7 @@ const server = http.createServer(async (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ""}<priority>${u.pri}</priority></url>`).join("\n")}
 </urlset>`;
-      return send(res, 200, xml, { "Content-Type": "application/xml; charset=utf-8" });
+      return send(res, 200, xml, { "Content-Type": "application/xml; charset=utf-8" }, req);
     }
 
     /* ---------- admin auth ---------- */
