@@ -29,6 +29,31 @@
     });
   });
 
+  /* ---- Open cross-page links in a new tab ----
+     Any link that navigates to a different page opens in its own tab so the
+     current page stays put. In-page jumps (#faq, #contact, the skip link) and
+     non-navigation links (mailto:, tel:) are left in the same tab. */
+  (function openLinksInNewTab() {
+    var here = location.pathname.replace(/\/index\.html$/, "/");
+    document.querySelectorAll("a[href]").forEach(function (a) {
+      var raw = a.getAttribute("href") || "";
+      if (!raw || raw.charAt(0) === "#") return;
+      if (/^(mailto:|tel:|javascript:)/i.test(raw)) return;
+      var url;
+      try {
+        url = new URL(raw, location.href);
+      } catch (e) {
+        return;
+      }
+      if (url.protocol !== "http:" && url.protocol !== "https:") return;
+      // A pure in-page anchor on the current page stays in the same tab.
+      var there = url.pathname.replace(/\/index\.html$/, "/");
+      if (url.origin === location.origin && there === here && url.hash) return;
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener");
+    });
+  })();
+
   /* ---- Mobile nav toggle ---- */
   var nav = document.querySelector(".nav");
   var toggle = document.querySelector(".nav__toggle");
