@@ -9,6 +9,48 @@
     if (typeof window.fbq === "function") window.fbq("track", event, params);
   }
 
+  /* ---- UTM / attribution capture ----
+     Records where a visitor came from the first time they land, and keeps it in
+     localStorage so it survives every page-to-page navigation. When they later
+     book a demo or fill the contact form, this data rides along with the lead.
+     First-touch on purpose: the original source is what we want to credit, so a
+     later visit does not overwrite it. */
+  var ATTR_KEY = "hawcus_attribution";
+  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
+
+  function captureAttribution() {
+    var stored = null;
+    try {
+      stored = JSON.parse(window.localStorage.getItem(ATTR_KEY) || "null");
+    } catch (e) {
+      stored = null;
+    }
+    if (stored) return stored;
+
+    var params = new URLSearchParams(window.location.search);
+    var data = {};
+    UTM_KEYS.forEach(function (k) {
+      var v = params.get(k);
+      if (v) data[k] = String(v).slice(0, 200);
+    });
+    // Record landing context for every first visit, even with no UTM tags, so
+    // organic and direct leads still carry a referrer and landing page.
+    data.landing_page = (window.location.pathname + window.location.search).slice(0, 300);
+    data.referrer = (document.referrer || "").slice(0, 300);
+    data.first_seen = new Date().toISOString();
+
+    try {
+      window.localStorage.setItem(ATTR_KEY, JSON.stringify(data));
+    } catch (e) {
+      /* private mode or storage full: fall back to in-memory for this page */
+    }
+    return data;
+  }
+
+  // Exposed so the booking form (book-demo.js) can read the same data.
+  window.hawcusAttribution = captureAttribution;
+  captureAttribution();
+
   /* ---- Meta Pixel: CTA click tracking ----
      One delegated listener so each physical click fires exactly one event,
      no matter how many CTAs a page has or where they were added later
@@ -183,7 +225,7 @@
         var res = await fetch("/api/leads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          body: JSON.stringify(Object.assign({
             kind: "contact",
             name: form.elements.name.value.trim(),
             email: form.elements.email.value.trim(),
@@ -191,7 +233,7 @@
             team_size: form.elements.team.value,
             message: form.elements.message.value.trim(),
             website: form.elements.website ? form.elements.website.value : "",
-          }),
+          }, captureAttribution())),
         });
         var data = await res.json().catch(function () { return {}; });
         if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");

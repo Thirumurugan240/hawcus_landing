@@ -253,6 +253,21 @@ function recordLead(ip) {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const clean = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 
+/* Marketing attribution the landing page sends along with every lead. */
+const ATTRIBUTION_KEYS = [
+  "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+  "gclid", "fbclid", "referrer", "landing_page", "first_seen",
+];
+
+function pickAttribution(body) {
+  const attribution = {};
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = clean(body[key], 300);
+    if (value) attribution[key] = value;
+  }
+  return attribution;
+}
+
 function normaliseLead(body) {
   const kind = body.kind === "demo" ? "demo" : "contact";
   const lead = {
@@ -263,6 +278,7 @@ function normaliseLead(body) {
     company: clean(body.company || body.business, 160),
     team_size: clean(body.team_size, 40),
     message: String(body.message ?? "").trim().slice(0, 2000),
+    attribution: pickAttribution(body),
   };
 
   if (!lead.name) throw new Error("Name is required");
@@ -275,6 +291,8 @@ function normaliseLead(body) {
 }
 
 function leadFields(lead) {
+  const a = lead.attribution || {};
+  const source = [a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean).join(" / ");
   return [
     ["Name", lead.name],
     ["Email", lead.email],
@@ -282,6 +300,10 @@ function leadFields(lead) {
     ["Business", lead.company],
     ["Team size", lead.team_size],
     ["Message", lead.message],
+    ["Source", source],
+    ["Campaign", a.utm_campaign],
+    ["Landing page", a.landing_page],
+    ["Referrer", a.referrer],
   ];
 }
 
@@ -448,7 +470,7 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
          A failure here must never fail the visitor's submission, so it is caught
          and logged. Runs regardless of whether mail is configured. */
       const crmDone = CRM_READY
-        ? sendToCrm({ name: lead.name, email: lead.email, phone: crmPhone(lead.phone) })
+        ? sendToCrm({ name: lead.name, email: lead.email, phone: crmPhone(lead.phone), attribution: lead.attribution })
             .catch((err) => console.error(`CRM forward failed for lead ${row.id}:`, err.message))
         : Promise.resolve();
 

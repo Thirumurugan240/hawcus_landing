@@ -97,17 +97,21 @@
     btn.textContent = "Sending...";
 
     try {
+      // Attribution (UTM, referrer, landing page) captured by main.js on landing.
+      var attribution =
+        typeof window.hawcusAttribution === "function" ? window.hawcusAttribution() : {};
+
       var res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify(Object.assign({
           kind: "demo",
           name: form.elements.name.value.trim(),
           email: form.elements.email.value.trim(),
           business: form.elements.business.value.trim(),
           phone: form.elements.phone.value.trim(),
           website: form.elements.website ? form.elements.website.value : "",
-        }),
+        }, attribution)),
       });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
