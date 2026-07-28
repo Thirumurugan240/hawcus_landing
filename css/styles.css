@@ -723,9 +723,9 @@ ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; }
   align-items: center;
   padding: clamp(1.75rem, 3.5vw, 2.75rem);
   background: var(--surface);
-  border: 1px solid var(--hairline);
+  border: 2px solid var(--ink);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 .mpartner__badge {
   display: flex;
