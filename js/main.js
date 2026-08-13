@@ -10,11 +10,18 @@
   }
 
   /* ---- UTM / attribution capture ----
-     Records where a visitor came from the first time they land, and keeps it in
-     localStorage so it survives every page-to-page navigation. When they later
-     book a demo or fill the contact form, this data rides along with the lead.
-     First-touch on purpose: the original source is what we want to credit, so a
-     later visit does not overwrite it. */
+     Records where a visitor came from and keeps it in localStorage so it
+     survives every page-to-page navigation. When they later book a demo or fill
+     the contact form, this data rides along with the lead.
+
+     Landing context (referrer, landing page, first_seen) is first-touch: set
+     once and never overwritten. UTM and click IDs, however, are captured from
+     the current URL WHENEVER they are present, and merged over whatever was
+     stored. That matters because a visitor's first ever visit is often organic
+     or direct with no UTM tags; without this, that empty first-touch record
+     would be returned forever and every later ad click (the one that actually
+     drives the conversion) would send blank UTM to the CRM. Last non-empty UTM
+     wins, so the campaign that led to this visit is the one we credit. */
   var ATTR_KEY = "hawcus_attribution";
   var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
 
@@ -25,19 +32,34 @@
     } catch (e) {
       stored = null;
     }
-    if (stored) return stored;
 
+    // UTM / click IDs present in the URL of this specific page load.
     var params = new URLSearchParams(window.location.search);
-    var data = {};
+    var current = {};
     UTM_KEYS.forEach(function (k) {
       var v = params.get(k);
-      if (v) data[k] = String(v).slice(0, 200);
+      if (v) current[k] = String(v).slice(0, 200);
     });
-    // Record landing context for every first visit, even with no UTM tags, so
-    // organic and direct leads still carry a referrer and landing page.
-    data.landing_page = (window.location.pathname + window.location.search).slice(0, 300);
-    data.referrer = (document.referrer || "").slice(0, 300);
-    data.first_seen = new Date().toISOString();
+    var hasCurrentUtm = Object.keys(current).length > 0;
+
+    // Nothing new to record and we already have a stored record: reuse it.
+    if (stored && !hasCurrentUtm) return stored;
+
+    var data = stored || {};
+
+    // First-touch landing context: only ever set on the very first visit.
+    if (!data.landing_page) {
+      data.landing_page = (window.location.pathname + window.location.search).slice(0, 300);
+    }
+    if (!data.referrer) data.referrer = (document.referrer || "").slice(0, 300);
+    if (!data.first_seen) data.first_seen = new Date().toISOString();
+
+    // Merge the campaign that drove THIS visit over anything stored before.
+    if (hasCurrentUtm) {
+      UTM_KEYS.forEach(function (k) {
+        if (current[k]) data[k] = current[k];
+      });
+    }
 
     try {
       window.localStorage.setItem(ATTR_KEY, JSON.stringify(data));
