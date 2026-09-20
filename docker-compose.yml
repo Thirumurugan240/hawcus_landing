@@ -5,11 +5,11 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: hawcus
-      POSTGRES_PASSWORD: hawcus_dev_pw
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: hawcus
     ports:
       # 5433 on the host so it never clashes with a local Postgres install
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - hawcus-pgdata:/var/lib/postgresql/data
     healthcheck:

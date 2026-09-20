@@ -6,7 +6,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
-import { PORT, SITE_ORIGIN, MAIL_READY, CRM_READY } from "./lib/config.js";
+import { PORT, SITE_ORIGIN, MAIL_READY, CRM_READY, GOOGLE_OAUTH, GOOGLE_OAUTH_READY } from "./lib/config.js";
 import { sendLead } from "./lib/mail.js";
 import { sendToCrm } from "./lib/crm.js";
 import * as db from "./lib/db.js";
@@ -14,6 +14,10 @@ import { login, createSessionCookie, clearSessionCookie, readSession, visitorId 
 import { renderBlogIndex, renderArticle, slugify, estimateMinutes, gradFor, CATEGORIES } from "./lib/render.js";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+
+function hostName(req) {
+  return String(req.headers.host || "").split(":")[0].toLowerCase();
+}
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -63,6 +67,57 @@ function json(res, status, data, headers = {}) {
   send(res, status, JSON.stringify(data), { "Content-Type": "application/json; charset=utf-8", ...headers });
 }
 
+function html(res, status, body, headers = {}) {
+  send(res, status, body, { "Content-Type": "text/html; charset=utf-8", ...headers });
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function googleOAuthRedirectUri(req) {
+  const host = hostName(req) || "dashboard.hawcus.com";
+  return `https://${host}/oauth2callback`;
+}
+
+function googleOAuthAuthorizeUrl(req) {
+  const redirectUri = googleOAuthRedirectUri(req);
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  url.searchParams.set("client_id", GOOGLE_OAUTH.clientId);
+  url.searchParams.set("redirect_uri", redirectUri);
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("access_type", "offline");
+  url.searchParams.set("prompt", "consent");
+  url.searchParams.set("include_granted_scopes", "true");
+  url.searchParams.set("scope", GOOGLE_OAUTH.scopes);
+  return url.toString();
+}
+
+async function exchangeGoogleOAuthCode(req, code) {
+  const redirectUri = googleOAuthRedirectUri(req);
+  const body = new URLSearchParams({
+    code,
+    client_id: GOOGLE_OAUTH.clientId,
+    client_secret: GOOGLE_OAUTH.clientSecret,
+    redirect_uri: redirectUri,
+    grant_type: "authorization_code",
+  });
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  const text = await tokenRes.text();
+  let data;
+  try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
+  return { ok: tokenRes.ok, status: tokenRes.status, data, redirectUri };
+}
+
 async function readBody(req, limit = 1_000_000) {
   const chunks = [];
   let size = 0;
@@ -94,7 +149,7 @@ function requireAuth(req, res) {
 
 /* Only these directories are web-served. Everything else (lib/, scripts/, data/,
    node_modules/, server.js, package.json, docker-compose.yml) stays private. */
-const PUBLIC_DIRS = new Set(["css", "js", "assets", "client-logos", "admin", "blog", "features"]);
+const PUBLIC_DIRS = new Set(["css", "js", "assets", "client-logos", "admin", "dashboard", "blog", "features"]);
 
 /* Static pages built by scripts/build-features.js, listed here for the sitemap. */
 const FEATURE_SLUGS = [
@@ -284,7 +339,6 @@ function normaliseLead(body) {
   if (!lead.name) throw new Error("Name is required");
   if (!EMAIL_RE.test(lead.email)) throw new Error("A valid email is required");
   if (kind === "demo") {
-    if (!lead.company) throw new Error("Business name is required");
     if (lead.phone.replace(/\D/g, "").length < 10) throw new Error("A valid contact number is required");
   }
   return lead;
@@ -399,7 +453,7 @@ const server = http.createServer(async (req, res) => {
 
     if (isRead(req) && pathname === "/sitemap.xml") {
       const posts = await db.listPosts({ status: "published" });
-      const PAGES_MOD = "2026-07-25";
+      const PAGES_MOD = new Date().toISOString().slice(0, 10);
       const urls = [
         { loc: `${SITE_ORIGIN}/`, pri: "1.0", lastmod: PAGES_MOD },
         { loc: `${SITE_ORIGIN}/pricing`, pri: "0.9", lastmod: PAGES_MOD },
@@ -419,6 +473,36 @@ const server = http.createServer(async (req, res) => {
 ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ""}<priority>${u.pri}</priority></url>`).join("\n")}
 </urlset>`;
       return send(res, 200, xml, { "Content-Type": "application/xml; charset=utf-8" }, req);
+    }
+
+    /* ---------- Google OAuth helper ---------- */
+
+    if (hostName(req) === "dashboard.hawcus.com" && req.method === "GET" && pathname === "/oauth/google/start") {
+      if (!GOOGLE_OAUTH_READY) {
+        return html(res, 500, `<!doctype html><meta charset="utf-8"><title>OAuth not configured</title><h1>OAuth not configured</h1><p>Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the environment, then restart Hawcus.</p>`);
+      }
+      res.writeHead(302, { Location: googleOAuthAuthorizeUrl(req) });
+      return res.end();
+    }
+
+    if (hostName(req) === "dashboard.hawcus.com" && req.method === "GET" && pathname === "/oauth2callback") {
+      if (!GOOGLE_OAUTH_READY) {
+        return html(res, 500, `<!doctype html><meta charset="utf-8"><title>OAuth not configured</title><h1>OAuth not configured</h1><p>Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the environment, then restart Hawcus.</p>`);
+      }
+      const error = url.searchParams.get("error");
+      if (error) {
+        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth error</title><h1>OAuth error</h1><p>${escapeHtml(error)}</p>`);
+      }
+      const code = url.searchParams.get("code");
+      if (!code) {
+        return html(res, 200, `<!doctype html><meta charset="utf-8"><title>Hawcus Google OAuth</title><h1>Hawcus Google OAuth</h1><p>Use <a href="/oauth/google/start">/oauth/google/start</a> to begin authorization.</p><p>Redirect URI registered in Google Cloud Console:</p><pre>${escapeHtml(googleOAuthRedirectUri(req))}</pre>`);
+      }
+      const out = await exchangeGoogleOAuthCode(req, code);
+      if (!out.ok) {
+        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth exchange failed</title><h1>OAuth exchange failed</h1><p>Redirect URI used:</p><pre>${escapeHtml(out.redirectUri)}</pre><pre>${escapeHtml(JSON.stringify(out.data, null, 2))}</pre>`);
+      }
+      const { refresh_token, access_token, scope, expires_in, token_type } = out.data || {};
+      return html(res, 200, `<!doctype html><meta charset="utf-8"><title>OAuth success</title><h1>OAuth success</h1><p>Copy the refresh token below into your Hawcus env / secret store.</p><h2>Refresh token</h2><pre style="white-space:pre-wrap;word-break:break-all">${escapeHtml(refresh_token || "(missing)")}</pre><h2>Other token data</h2><pre style="white-space:pre-wrap;word-break:break-all">${escapeHtml(JSON.stringify({ scope, expires_in, token_type, has_access_token: Boolean(access_token) }, null, 2))}</pre>`);
     }
 
     /* ---------- admin auth ---------- */
@@ -577,10 +661,41 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
       return json(res, 200, await db.analyticsOverview());
     }
 
+    if (req.method === "GET" && pathname === "/api/admin/dashboard") {
+      const session = requireAuth(req, res);
+      if (!session) return;
+      const [analytics, leads, seo] = await Promise.all([
+        db.analyticsOverview(),
+        db.listLeads(20),
+        db.seoDashboardSnapshot(30),
+      ]);
+      const leadTotals = await db.query(`
+        SELECT
+          COUNT(*)::int AS total,
+          COUNT(*) FILTER (WHERE kind = 'demo')::int AS demos,
+          COUNT(*) FILTER (WHERE kind = 'contact')::int AS contacts,
+          COUNT(*) FILTER (WHERE created_at > now() - interval '7 days')::int AS last_7_days,
+          COUNT(*) FILTER (WHERE emailed = false)::int AS pending_email
+        FROM leads
+      `);
+      return json(res, 200, {
+        user: session,
+        blog: analytics,
+        leads: { totals: leadTotals.rows[0], recent: leads },
+        seo: { daily: seo, latest: seo[0] || null },
+      });
+    }
+
     /* ---------- admin UI ---------- */
 
     if (pathname === "/admin" || pathname === "/admin/") {
       return serveStatic(req, res, "/admin/index.html").then((ok) => {
+        if (!ok) send(res, 404, notFoundPage());
+      });
+    }
+
+    if ((pathname === "/dashboard" || pathname === "/dashboard/" || pathname === "/dashboard/app" || pathname === "/dashboard/app/") && hostName(req) === "dashboard.hawcus.com") {
+      return serveStatic(req, res, "/dashboard/index.html").then((ok) => {
         if (!ok) send(res, 404, notFoundPage());
       });
     }
@@ -601,6 +716,9 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
       }
 
       let target = pathname === "/" ? "/index.html" : pathname;
+      if (hostName(req) === "dashboard.hawcus.com" && (pathname === "/" || pathname === "/dashboard" || pathname === "/dashboard/" || pathname === "/dashboard/app" || pathname === "/dashboard/app/")) {
+        target = "/dashboard/index.html";
+      }
       // an extensionless path is served from the matching .html file
       if (!path.extname(target) && !target.endsWith("/")) target += ".html";
 
@@ -640,7 +758,9 @@ async function start() {
   server.listen(PORT, () => {
     console.log(`\n  Hawcus site   http://localhost:${PORT}/`);
     console.log(`  Blog          http://localhost:${PORT}/blog/`);
-    console.log(`  Admin panel   http://localhost:${PORT}/admin\n`);
+    console.log(`  Admin panel   http://localhost:${PORT}/admin`);
+    console.log(`  OAuth start   http://localhost:${PORT}/oauth/google/start`);
+    console.log(`  OAuth cback   http://localhost:${PORT}/oauth2callback\n`);
   });
 }
 

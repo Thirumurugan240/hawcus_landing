@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Book a Free Demo | Hawcus CRM</title>
-  <meta name="description" content="Book a free 15-minute Hawcus CRM demo. See instant WhatsApp replies, auto follow-ups, the dialer app and your own pipeline, set up with your leads and your number." />
+  <title>Book a Hawcus CRM Demo | WhatsApp Follow-ups, Dialer & Pipeline</title>
+  <meta name="description" content="Book a free Hawcus CRM demo. See instant WhatsApp replies, auto follow-ups, the dialer app and your own pipeline, set up with your leads and your number." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://hawcus.com/book-a-demo" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Book a Free Demo | Hawcus CRM" />
+  <meta property="og:title" content="Book a Hawcus CRM Demo | WhatsApp Follow-ups, Dialer & Pipeline" />
   <meta property="og:description" content="A 15-minute walkthrough with your leads, your stages and your number. No slides." />
   <meta property="og:url" content="https://hawcus.com/book-a-demo" />
   <meta property="og:image" content="https://hawcus.com/hawcus-logo.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Book a Free Demo | Hawcus CRM" />
-  <meta name="twitter:description" content="A 15-minute walkthrough with your leads, your stages and your number." />
+  <meta name="twitter:title" content="Book a Hawcus CRM Demo" />
+  <meta name="twitter:description" content="See your leads, stages and number in a 15-minute Hawcus CRM walkthrough." />
 
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,6 +30,35 @@
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://hawcus.com/" },
       { "@type": "ListItem", "position": 2, "name": "Book a demo", "item": "https://hawcus.com/book-a-demo" }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long is the demo?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The demo is about 15 minutes and focuses on your use case, your leads and your sales process." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to bring anything?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Just your questions. If you have a live lead list or a current workflow, we can use that in the walkthrough." }
+      },
+      {
+        "@type": "Question",
+        "name": "Will you show me the product with my business?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. We set the walkthrough up around your leads, your stages and your number so you can see how Hawcus would work for your team." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there any obligation after the demo?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. The demo is free and there is no obligation to buy or sign up after the call." }
+      }
     ]
   }
   </script>
@@ -146,15 +175,20 @@
       <div class="bdhero__bg" aria-hidden="true"></div>
       <div class="container">
         <div class="bdhero__copy">
-          <h1><span class="bdhero__hl">Never lose a lead again</span><br class="bdhero__br" /> More replies. More calls. More conversions.</h1>
+          <h1><span class="bdhero__hl">See Hawcus in action</span><br class="bdhero__br" /> More replies. More calls. More conversions.</h1>
           <p>Hawcus helps you convert faster with instant WhatsApp replies, auto follow-ups and a pipeline that runs itself.</p>
+          <div class="bdhero__cta">
+            <a class="btn btn--primary btn--lg" href="#demo-booking">Book my free demo</a>
+            <a class="btn btn--ghost btn--lg" href="/pricing">See pricing</a>
+          </div>
+          <p class="bdhero__meta">No credit card • 15-minute call • We reply within one working hour</p>
         </div>
 
         <div class="bdcard">
           <!-- ---- left: what you will see ---- -->
           <div class="bdcard__left">
             <img class="bdcard__logo" src="/hawcus-logo.png" alt="Hawcus CRM" width="150" height="63" />
-            <h2>How Hawcus helps you close more deals</h2>
+            <h2>How Hawcus helps you book more demos</h2>
             <ul class="bdlist">
               <li>
                 <span class="bdlist__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
@@ -206,9 +240,9 @@
                 </div>
 
                 <div class="bdfield">
-                  <label for="bd-business">Business name or website <span aria-hidden="true">*</span></label>
-                  <input type="text" id="bd-business" name="business" autocomplete="organization" placeholder="Enter business name or website" required aria-describedby="bd-business-err" />
-                  <small class="bdfield__err" id="bd-business-err" hidden>Business name is required</small>
+                  <label for="bd-business">Business name or website <span class="bdfield__opt">(optional)</span></label>
+                  <input type="text" id="bd-business" name="business" autocomplete="organization" placeholder="Enter business name or website" aria-describedby="bd-business-err" />
+                  <small class="bdfield__err" id="bd-business-err" hidden>Business name is optional</small>
                 </div>
 
                 <div class="bdfield">
@@ -227,7 +261,7 @@
                 <label for="hp-demo">Leave this empty</label>
                 <input type="text" id="hp-demo" name="website" tabindex="-1" autocomplete="off" />
               </div>
-              <button class="btn btn--primary btn--block btn--lg bdform__btn" type="submit">Book a free demo</button>
+              <button class="btn btn--primary btn--block btn--lg bdform__btn" type="submit">Book my free demo</button>
               </div>
             </form>
           </div>
@@ -430,9 +464,33 @@
       </div>
     </section>
     <!-- WHY:END -->
-  </main>
-
-  <footer class="site-footer">
+    <section class="section bdfaq">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Questions</span>
+          <h2>What to expect on the demo</h2>
+          <p>Quick answers so you know exactly what happens after you book.</p>
+        </div>
+        <div class="bdfaq__grid">
+          <div class="bdfaq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            <b itemprop="name">How long is the demo?</b>
+            <p itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><span itemprop="text">The demo is about 15 minutes and focuses on your use case, your leads and your sales process.</span></p>
+          </div>
+          <div class="bdfaq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            <b itemprop="name">Do I need to bring anything?</b>
+            <p itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><span itemprop="text">Just your questions. If you have a live lead list or a current workflow, we can use that in the walkthrough.</span></p>
+          </div>
+          <div class="bdfaq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            <b itemprop="name">Will you show me the product with my business?</b>
+            <p itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><span itemprop="text">Yes. We set the walkthrough up around your leads, your stages and your number so you can see how Hawcus would work for your team.</span></p>
+          </div>
+          <div class="bdfaq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            <b itemprop="name">Is there any obligation after the demo?</b>
+            <p itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><span itemprop="text">No. The demo is free and there is no obligation to buy or sign up after the call.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
     <div class="container">
       <div class="footer__grid">
         <div class="footer__brand">

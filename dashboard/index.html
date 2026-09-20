@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hawcus SEO Dashboard</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/dashboard/dashboard.css?v=20260822b" />
+</head>
+<body class="seo-dash">
+  <div class="seo-login" id="view-login" hidden>
+    <form class="seo-login__card" id="login-form">
+      <img src="/hawcus-logo.png" alt="Hawcus" width="120" height="50" />
+      <h1>SEO dashboard sign in</h1>
+      <p>See blog, search, and analytics performance in one place.</p>
+
+      <label>
+        <span>Email</span>
+        <input type="email" name="email" autocomplete="username" required />
+      </label>
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" autocomplete="current-password" required />
+      </label>
+
+      <p class="seo-error" id="login-error" hidden></p>
+      <button class="btn btn--primary btn--block btn--lg" type="submit">Sign in</button>
+    </form>
+  </div>
+
+  <div class="seo-app" id="view-app" hidden>
+    <aside class="seo-side">
+      <a class="seo-side__logo" href="/" title="Back to site">
+        <img src="/hawcus-logo.png" alt="Hawcus" width="110" height="46" />
+      </a>
+      <nav class="seo-nav">
+        <button type="button" class="seo-nav__item is-on" data-panel="overview">Overview</button>
+        <button type="button" class="seo-nav__item" data-panel="search">Search</button>
+        <button type="button" class="seo-nav__item" data-panel="blog">Blog</button>
+        <button type="button" class="seo-nav__item" data-panel="improve">Improve</button>
+        <button type="button" class="seo-nav__item" data-panel="leads">Leads</button>
+      </nav>
+      <div class="seo-side__foot">
+        <a href="/admin/" target="_blank" rel="noopener">Open admin</a>
+        <button type="button" id="logout">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="seo-main">
+      <header class="seo-top">
+        <div>
+          <p class="seo-kicker">Hawcus CRM</p>
+          <h1>SEO dashboard</h1>
+          <p id="page-sub">Daily performance for blog content, search visibility, and lead activity.</p>
+        </div>
+        <div class="seo-who">
+          <span class="seo-who__av" id="who-av">A</span>
+          <span><b id="who-name">Admin</b><small id="who-email"></small></span>
+        </div>
+      </header>
+
+      <section class="seo-panel is-on" data-panel="overview">
+        <div class="seo-kpis" id="kpis"></div>
+
+        <div class="seo-grid">
+          <div class="seo-card">
+            <div class="seo-card__head">
+              <h2>Blog views, last 14 days</h2>
+              <span class="seo-muted">From Hawcus blog analytics</span>
+            </div>
+            <div class="seo-chart" id="blog-chart"></div>
+          </div>
+
+          <div class="seo-card">
+            <div class="seo-card__head">
+              <h2>Current SEO snapshot</h2>
+              <span class="seo-muted" id="snapshot-updated">Waiting for data…</span>
+            </div>
+            <div class="seo-snapshot" id="snapshot-box"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="seo-panel" data-panel="search">
+        <div class="seo-card">
+          <div class="seo-card__head">
+            <h2>Top search queries</h2>
+            <span class="seo-muted">Google Search Console snapshot</span>
+          </div>
+          <div class="seo-tablewrap"><table class="seo-table" id="queries-table"></table></div>
+        </div>
+
+        <div class="seo-card">
+          <div class="seo-card__head">
+            <h2>Top pages</h2>
+            <span class="seo-muted">Search Console page performance</span>
+          </div>
+          <div class="seo-tablewrap"><table class="seo-table" id="pages-table"></table></div>
+        </div>
+      </section>
+
+      <section class="seo-panel" data-panel="blog">
+        <div class="seo-card">
+          <div class="seo-card__head">
+            <h2>Blog performance</h2>
+            <span class="seo-muted">Clicks, unique readers, and average read time</span>
+          </div>
+          <div class="seo-tablewrap"><table class="seo-table" id="blog-table"></table></div>
+        </div>
+      </section>
+
+      <section class="seo-panel" data-panel="improve">
+        <div class="seo-card">
+          <div class="seo-card__head">
+            <h2>Daily improvement plan</h2>
+            <span class="seo-muted">Generated from search demand and page performance</span>
+          </div>
+          <div class="seo-improve" id="improve-box"></div>
+        </div>
+      </section>
+
+      <section class="seo-panel" data-panel="leads">
+        <div class="seo-grid seo-grid--compact">
+          <div class="seo-card">
+            <div class="seo-card__head"><h2>Lead totals</h2></div>
+            <div class="seo-snapshot" id="lead-totals"></div>
+          </div>
+          <div class="seo-card">
+            <div class="seo-card__head"><h2>Recent leads</h2></div>
+            <div class="seo-tablewrap"><table class="seo-table" id="leads-table"></table></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="seo-toast" id="toast" hidden></div>
+  <script src="/dashboard/dashboard.js?v=20260820a"></script>
+</body>
+</html>
