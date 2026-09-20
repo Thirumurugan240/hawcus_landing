@@ -10,7 +10,7 @@ import { PORT, SITE_ORIGIN, MAIL_READY, CRM_READY, GOOGLE_OAUTH, GOOGLE_OAUTH_RE
 import { sendLead } from "./lib/mail.js";
 import { sendToCrm } from "./lib/crm.js";
 import * as db from "./lib/db.js";
-import { login, createSessionCookie, clearSessionCookie, readSession, visitorId } from "./lib/auth.js";
+import { login, createSessionCookie, clearSessionCookie, readSession, visitorId, parseCookies } from "./lib/auth.js";
 import { renderBlogIndex, renderArticle, slugify, estimateMinutes, gradFor, CATEGORIES } from "./lib/render.js";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -85,7 +85,7 @@ function googleOAuthRedirectUri(req) {
   return `https://${host}/oauth2callback`;
 }
 
-function googleOAuthAuthorizeUrl(req) {
+function googleOAuthAuthorizeUrl(req, state) {
   const redirectUri = googleOAuthRedirectUri(req);
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   url.searchParams.set("client_id", GOOGLE_OAUTH.clientId);
@@ -95,7 +95,27 @@ function googleOAuthAuthorizeUrl(req) {
   url.searchParams.set("prompt", "consent");
   url.searchParams.set("include_granted_scopes", "true");
   url.searchParams.set("scope", GOOGLE_OAUTH.scopes);
+  url.searchParams.set("state", state);
   return url.toString();
+}
+
+/* CSRF protection for the OAuth flow: /oauth/google/start mints a random state,
+   stores it in this short-lived HttpOnly cookie, and puts it on the authorize
+   URL; /oauth2callback only proceeds when the returned state matches the cookie.
+   Without it, an attacker could trick a signed-in admin into completing a flow
+   with the attacker's authorization code. */
+const OAUTH_STATE_COOKIE = "hawcus_oauth_state";
+function setOauthStateCookie(state) {
+  return `${OAUTH_STATE_COOKIE}=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`;
+}
+function clearOauthStateCookie() {
+  return `${OAUTH_STATE_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+}
+function oauthStateMatches(returned, stored) {
+  if (!returned || !stored) return false;
+  const a = Buffer.from(String(returned));
+  const b = Buffer.from(String(stored));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 async function exchangeGoogleOAuthCode(req, code) {
@@ -478,31 +498,47 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
     /* ---------- Google OAuth helper ---------- */
 
     if (hostName(req) === "dashboard.hawcus.com" && req.method === "GET" && pathname === "/oauth/google/start") {
+      if (!readSession(req)) {
+        return html(res, 401, `<!doctype html><meta charset="utf-8"><title>Sign in required</title><h1>Sign in required</h1><p>Sign in to the <a href="/">Hawcus dashboard</a> before connecting Google.</p>`);
+      }
       if (!GOOGLE_OAUTH_READY) {
         return html(res, 500, `<!doctype html><meta charset="utf-8"><title>OAuth not configured</title><h1>OAuth not configured</h1><p>Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the environment, then restart Hawcus.</p>`);
       }
-      res.writeHead(302, { Location: googleOAuthAuthorizeUrl(req) });
+      const state = crypto.randomBytes(32).toString("base64url");
+      res.writeHead(302, {
+        Location: googleOAuthAuthorizeUrl(req, state),
+        "Set-Cookie": setOauthStateCookie(state),
+      });
       return res.end();
     }
 
     if (hostName(req) === "dashboard.hawcus.com" && req.method === "GET" && pathname === "/oauth2callback") {
+      if (!readSession(req)) {
+        return html(res, 401, `<!doctype html><meta charset="utf-8"><title>Sign in required</title><h1>Sign in required</h1><p>Sign in to the <a href="/">Hawcus dashboard</a> before connecting Google.</p>`);
+      }
       if (!GOOGLE_OAUTH_READY) {
         return html(res, 500, `<!doctype html><meta charset="utf-8"><title>OAuth not configured</title><h1>OAuth not configured</h1><p>Set <code>GOOGLE_OAUTH_CLIENT_ID</code> and <code>GOOGLE_OAUTH_CLIENT_SECRET</code> in the environment, then restart Hawcus.</p>`);
       }
       const error = url.searchParams.get("error");
       if (error) {
-        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth error</title><h1>OAuth error</h1><p>${escapeHtml(error)}</p>`);
+        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth error</title><h1>OAuth error</h1><p>${escapeHtml(error)}</p>`, { "Set-Cookie": clearOauthStateCookie() });
       }
       const code = url.searchParams.get("code");
       if (!code) {
         return html(res, 200, `<!doctype html><meta charset="utf-8"><title>Hawcus Google OAuth</title><h1>Hawcus Google OAuth</h1><p>Use <a href="/oauth/google/start">/oauth/google/start</a> to begin authorization.</p><p>Redirect URI registered in Google Cloud Console:</p><pre>${escapeHtml(googleOAuthRedirectUri(req))}</pre>`);
       }
+      /* CSRF check: the state Google echoes back must match the cookie we set
+         when the flow started, so a forged callback cannot bind an attacker's
+         authorization code to this admin's session. */
+      if (!oauthStateMatches(url.searchParams.get("state"), parseCookies(req)[OAUTH_STATE_COOKIE])) {
+        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth state mismatch</title><h1>OAuth state mismatch</h1><p>The authorization could not be verified. Start again from <a href="/oauth/google/start">/oauth/google/start</a>.</p>`, { "Set-Cookie": clearOauthStateCookie() });
+      }
       const out = await exchangeGoogleOAuthCode(req, code);
       if (!out.ok) {
-        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth exchange failed</title><h1>OAuth exchange failed</h1><p>Redirect URI used:</p><pre>${escapeHtml(out.redirectUri)}</pre><pre>${escapeHtml(JSON.stringify(out.data, null, 2))}</pre>`);
+        return html(res, 400, `<!doctype html><meta charset="utf-8"><title>OAuth exchange failed</title><h1>OAuth exchange failed</h1><p>Redirect URI used:</p><pre>${escapeHtml(out.redirectUri)}</pre><pre>${escapeHtml(JSON.stringify(out.data, null, 2))}</pre>`, { "Set-Cookie": clearOauthStateCookie() });
       }
       const { refresh_token, access_token, scope, expires_in, token_type } = out.data || {};
-      return html(res, 200, `<!doctype html><meta charset="utf-8"><title>OAuth success</title><h1>OAuth success</h1><p>Copy the refresh token below into your Hawcus env / secret store.</p><h2>Refresh token</h2><pre style="white-space:pre-wrap;word-break:break-all">${escapeHtml(refresh_token || "(missing)")}</pre><h2>Other token data</h2><pre style="white-space:pre-wrap;word-break:break-all">${escapeHtml(JSON.stringify({ scope, expires_in, token_type, has_access_token: Boolean(access_token) }, null, 2))}</pre>`);
+      return html(res, 200, `<!doctype html><meta charset="utf-8"><title>OAuth success</title><h1>OAuth success</h1><p>Copy the refresh token below into your Hawcus env / secret store, then restart Hawcus. This page is only reachable by a signed-in admin.</p><h2>Refresh token</h2><pre style="white-space:pre-wrap;word-break:break-all">${escapeHtml(refresh_token || "(missing)")}</pre><h2>Other token data</h2><pre style="white-space:pre-wrap;word-break:break-all">${escapeHtml(JSON.stringify({ scope, expires_in, token_type, has_access_token: Boolean(access_token) }, null, 2))}</pre>`, { "Set-Cookie": clearOauthStateCookie() });
     }
 
     /* ---------- admin auth ---------- */
