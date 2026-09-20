@@ -3,6 +3,20 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  /* Escape any value that ends up inside innerHTML. Lead fields (name, email,
+     phone, company) come from public forms, so they are attacker controlled;
+     without this a crafted submission runs script in the admin's session. */
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+  }
+  /* Only allow site-relative or http(s) links, never javascript:/data: URIs. */
+  function safeHref(u) {
+    const s = String(u || '');
+    return (/^\/[^/]/.test(s) || /^https?:\/\//i.test(s)) ? s : '#';
+  }
+
   const state = { data: null };
   const toastEl = $('#toast');
 
@@ -77,7 +91,7 @@
     const daily = (state.data?.blog?.daily || []).slice(-14);
     const max = Math.max(1, ...daily.map(d => Number(d.views || 0)));
     $('#blog-chart').innerHTML = daily.map(row => `
-      <div class="seo-chart__bar" title="${row.day}: ${row.views} views">
+      <div class="seo-chart__bar" title="${esc(row.day)}: ${fmtInt(row.views)} views">
         <i style="height:${Math.max(8, Math.round((Number(row.views || 0) / max) * 100))}%"></i>
         <span>${toDayLabel(row.day)}</span>
       </div>
@@ -129,7 +143,7 @@
       queries.length ? queries.map((q, idx) => `
         <tr>
           <td><span class="seo-pill">#${idx + 1}</span></td>
-          <td><strong>${q.query || q.name || '—'}</strong><span class="seo-muted-row">${q.page || q.url || ''}</span></td>
+          <td><strong>${esc(q.query || q.name || '—')}</strong><span class="seo-muted-row">${esc(q.page || q.url || '')}</span></td>
           <td>${fmtInt(q.clicks)}</td>
           <td>${fmtInt(q.impressions)}</td>
           <td>${fmtPct(q.ctr || 0)}</td>
@@ -143,7 +157,7 @@
       pages.length ? pages.map((p, idx) => `
         <tr>
           <td><span class="seo-pill">#${idx + 1}</span></td>
-          <td><strong>${p.page || p.url || '—'}</strong><span class="seo-muted-row">${p.title || ''}</span></td>
+          <td><strong>${esc(p.page || p.url || '—')}</strong><span class="seo-muted-row">${esc(p.title || '')}</span></td>
           <td>${fmtInt(p.clicks)}</td>
           <td>${fmtInt(p.impressions)}</td>
           <td>${fmtPct(p.ctr || 0)}</td>
@@ -160,11 +174,11 @@
       posts.map((p, idx) => `
         <tr>
           <td><span class="seo-pill">#${idx + 1}</span></td>
-          <td><strong>${p.title}</strong><span class="seo-muted-row">/${p.slug}/</span></td>
+          <td><strong>${esc(p.title)}</strong><span class="seo-muted-row">/${esc(p.slug)}/</span></td>
           <td>${fmtInt(p.views)}</td>
           <td>${fmtInt(p.uniques)}</td>
           <td>${fmtSecs(p.avg_secs)}</td>
-          <td>${p.status}</td>
+          <td>${esc(p.status)}</td>
         </tr>
       `),
       ['Rank', 'Post', 'Views', 'Unique readers', 'Avg read', 'Status']
@@ -185,11 +199,11 @@
     $('#leads-table').innerHTML = tableHtml(
       leads.map((l) => `
         <tr>
-          <td><strong>${l.kind}</strong><span class="seo-muted-row">${new Date(l.created_at).toLocaleString('en-IN')}</span></td>
-          <td>${l.name || '—'}</td>
-          <td>${l.email || '—'}</td>
-          <td>${l.phone || '—'}</td>
-          <td>${l.company || '—'}</td>
+          <td><strong>${esc(l.kind)}</strong><span class="seo-muted-row">${new Date(l.created_at).toLocaleString('en-IN')}</span></td>
+          <td>${esc(l.name || '—')}</td>
+          <td>${esc(l.email || '—')}</td>
+          <td>${esc(l.phone || '—')}</td>
+          <td>${esc(l.company || '—')}</td>
         </tr>
       `),
       ['Type', 'Name', 'Email', 'Phone', 'Company']
@@ -205,10 +219,10 @@
       <div class="seo-focus">
         <span class="seo-pill">Top priority</span>
         <h3>${focus.kind === 'new' ? 'New content' : focus.kind === 'page' ? 'Page tune-up' : 'Content refresh'}</h3>
-        <p><strong>${focus.title}</strong></p>
-        <p class="seo-muted-row">${focus.why}</p>
-        <p>${focus.action}</p>
-        ${focus.path ? `<a href="${focus.path}" target="_blank" rel="noopener">Open target</a>` : ''}
+        <p><strong>${esc(focus.title)}</strong></p>
+        <p class="seo-muted-row">${esc(focus.why)}</p>
+        <p>${esc(focus.action)}</p>
+        ${focus.path ? `<a href="${esc(safeHref(focus.path))}" target="_blank" rel="noopener noreferrer">Open target</a>` : ''}
       </div>
     ` : '<p class="seo-muted-row">No recommendations yet. Run the daily sync first.</p>';
 
@@ -220,10 +234,10 @@
               <span class="seo-pill">#${r.rank}</span>
               <b>${r.kind === 'new' ? 'Create' : 'Improve'}</b>
             </div>
-            <h4>${r.title}</h4>
-            <p>${r.why}</p>
-            <p>${r.action}</p>
-            ${r.path ? `<small>${r.path}</small>` : ''}
+            <h4>${esc(r.title)}</h4>
+            <p>${esc(r.why)}</p>
+            <p>${esc(r.action)}</p>
+            ${r.path ? `<small>${esc(r.path)}</small>` : ''}
           </article>
         `).join('')}
       </div>
